@@ -43,13 +43,26 @@ curdate=$(date +"%y%m%d-%H%M%S")
 # Take screenshot
 filename="${PREFIX}_${name}_${curdate}.mp4"
 
-# echo "Recording... $filename"
-echo "adb -s $device shell screenrecord /sdcard/$filename"
-# adb -s $device shell screenrecord /sdcard/$filename
-echo "adb -s $device pull /sdcard/$filename"
-# adb -s $device pull /sdcard/$filename
-echo "adb -s $device shell rm /sdcard/$filename"
-# adb -s $device shell rm /sdcard/$filename
+# Trap C-c and pull video from device
+pull() {
+  echo "waiting for device to save..."
+  sleep 1
+
+  echo "pulling file $filename from device..."
+  echo "adb -s $device pull /sdcard/$filename"
+  adb -s $device pull /sdcard/$filename
+
+  echo "deleting file $filename from device..."
+  echo "adb -s $device shell rm /sdcard/$filename"
+  adb -s $device shell rm /sdcard/$filename
+
+  echo "done!"
+}
+trap 'pull' SIGINT
+
+# Record!
+echo "Recording... $filename: C-c to end."
+adb -s $device shell screenrecord /sdcard/$filename
 
 if [ $resize ]; then
   echo "./scale_video.sh $filename"
