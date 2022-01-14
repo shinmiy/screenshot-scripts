@@ -71,7 +71,7 @@ echo "converting $filename to $new_filename"
 
 convert -resize "${size}>" "$1" $new_filename
 # jpegoptim -qm80 $new_filename
-pngquant $new_filename
+pngquant --ext .png --force $new_filename
 
 rm -i "$1"
 
